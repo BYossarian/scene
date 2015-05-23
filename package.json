@@ -1,0 +1,27 @@
+{
+  "name": "scene",
+  "version": "0.5.0",
+  "description": "A Javascript ray tracer",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BYossarian/scene.git"
+  },
+  "keywords": [
+    "3D",
+    "graphics",
+    "ray",
+    "tracing",
+    "ray",
+    "casting"
+  ],
+  "author": "Ben Jackson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/BYossarian/scene/issues"
+  },
+  "homepage": "https://github.com/BYossarian/scene"
+}

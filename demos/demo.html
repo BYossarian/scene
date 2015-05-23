@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+    <style>
+    body { background: rgb(21, 21, 21); }
+    </style>
+</head>
+<body>
+<canvas></canvas>
+<script src="/index.js"></script>
+<script>
+
+    var scene = new Scene.Scene();
+
+    var sphere = new Scene.Sphere({ x: 0, y: -50, z: -2450 }, 100),
+        sphere2 = new Scene.Sphere({ x: 100, y: 0, z: -2500 }, 120),
+        sphere3 = new Scene.Sphere({ x: 400, y: 0, z: -1800 }, 200);
+
+    var sphere4 = new Scene.Sphere({ x: -200, y: 0, z: -1800 }, 100);
+    var sphere5 = new Scene.Sphere({ x: 100, y: 200, z: -2800 }, 80);
+    var sphere6 = new Scene.Sphere({ x: -500, y: 200, z: -2800 }, 150);
+
+    sphere._color = { r: 255, g: 0, b: 0};
+    sphere2._color = { r: 0, g: 255, b: 20};
+    sphere3._color = { r: 0, g: 0, b: 255};
+    sphere4._color = { r: 0, g: 200, b: 255};
+    sphere5._color = { r: 180, g: 220, b: 25};
+
+    // sphere3.getColor = function(point) {
+
+    //     if (((1650 + point.x) % 100) < 50 && ((1650 + point.y) % 100) < 50) {
+    //         return { r: 250, g: 250, b: 250};
+    //     } else {
+    //         if (((1650 + point.x) % 100) > 50 && ((1650 + point.y) % 100) > 50) {
+    //             return { r: 250, g: 250, b: 250};
+    //         } else {
+    //             return { r: 10, g: 10, b: 10};
+    //         }
+    //     }
+
+    // };
+
+    sphere6.getColor = function(point) {
+
+        if (((650 + point.x) % 80) < 40) {
+            return { r: 255, g: 0, b: 0};
+        } else {
+            return { r: 180, g: 220, b: 25};
+        }
+
+    };
+
+    scene.addSurface(sphere);
+    scene.addSurface(sphere2);
+    scene.addSurface(sphere3);
+    scene.addSurface(sphere4);
+    scene.addSurface(sphere5);
+    scene.addSurface(sphere6);
+    scene.render(document.querySelector('canvas'));
+
+</script>
+</body>
+</html>
