@@ -54,10 +54,23 @@
     scene.addSurface(sphere5);
     scene.addSurface(sphere6);
 
-    scene.addLight({ x:8, y:6, z: 15 });
-    scene.render(document.querySelector('canvas'));
+    var theta = 0;
 
+    function draw() {
 
+        scene._lights = [{ x:Math.cos(theta), y:Math.sin(theta), z: -Math.cos(theta) }];
+        scene.render(document.querySelector('canvas'));
+
+        if (theta < Math.PI * 2) {
+            theta += Math.PI/100;
+
+            setTimeout(draw, 0);
+
+        }
+
+    }
+
+    draw();
 
 </script>
 </body>

@@ -1,4 +1,6 @@
 
+var EPILSON = 0.001;
+
 function _dotProduct(v1, v2) {
 
     return (v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z);
@@ -11,6 +13,16 @@ function _subtract(v1, v2) {
         x: v1.x - v2.x,
         y: v1.y - v2.y,
         z: v1.z - v2.z
+    };
+
+}
+
+function _add(v1, v2) {
+
+    return {
+        x: v1.x + v2.x,
+        y: v1.y + v2.y,
+        z: v1.z + v2.z
     };
 
 }
@@ -33,19 +45,71 @@ function _normalise(v) {
 
 }
 
+// TODO: shading needs clean up
 function _shade(viewRay, intersection) {
 
-    var LIGHT = _normalise({ x: 1, y: 1, z: 0.5 });
-
     var point = _scale(intersection.t, viewRay.direction),
-        normal = intersection.surface.getNormal(point),
-        scale = (_dotProduct(LIGHT, normal) + 0.5)/1.5,
-        color = intersection.surface.getColor(point);
+        surfaceNormal = intersection.surface.getNormal(point),
+        normalisedView = _normalise(viewRay.direction),
+        color = intersection.surface.getColor(point),
+        l = this._lights.length,
+        red = color.r * this._ambientLight,
+        green = color.g * this._ambientLight,
+        blue = color.b * this._ambientLight,
+        light = null,
+        diffuseLight = 0,
+        specularReflection = 0,
+        halfwayVector = null,
+        numSurfaces = this._surfaces.length,
+        inShadow = false;
+
+    for (var i = 0; i < l; i++) {
+
+        light = this._lights[i];
+
+        // check for shadow
+        inShadow = false;
+
+        for (var j = 0; j < numSurfaces; j++) {
+
+            inShadow = !!this._surfaces[j].findRayIntersection({
+                origin: point,
+                direction: light.direction
+            }, EPILSON, Infinity);
+
+            if (inShadow) {
+                break;
+            }
+
+        }
+
+        if (inShadow) {
+            break;
+        }
+
+        halfwayVector = _normalise(_subtract(light.direction, normalisedView));
+
+        if (Math.pow(point.x, 2) < 1 &&  Math.pow(point.y, 2) < 1 ) {
+            console.log('point ', point);
+            console.log('halfwayVector ', halfwayVector);
+            console.log('surfaceNormal ', surfaceNormal);
+            console.log('light ', light.direction);
+            console.log('view ', normalisedView);
+        }
+
+        diffuseLight = light.intensity * Math.max(0, _dotProduct(surfaceNormal, light.direction));
+        specularReflection = light.intensity * 255 * Math.pow(Math.max(0, _dotProduct(surfaceNormal, halfwayVector) * 0.99), 100);
+
+        red += color.r * diffuseLight + specularReflection;
+        blue += color.b * diffuseLight + specularReflection;
+        green += color.g * diffuseLight + specularReflection;
+
+    }
 
     return {
-        r: color.r * scale,
-        b: color.b * scale,
-        g: color.g * scale
+        r: red,
+        b: blue,
+        g: green
     };
 
 }
@@ -71,12 +135,23 @@ function Scene(options) {
         height: options.imagePlane.height || 720
     };
 
+    this._background = options.background || { r: 31, g: 31, b: 31 };
+
+    this._ambientLight = options.ambientLight || 0.15;
+
     this._lights = [];
     this._surfaces = [];
 
 }
 
-Scene.prototype.addLight = function(light) {};
+Scene.prototype.addLight = function(direction, intensity) {
+
+    this._lights.push({
+        direction: _normalise(direction),
+        intensity: intensity || 1
+    });
+
+};
 
 Scene.prototype.addSurface = function(surface) {
 
@@ -104,9 +179,7 @@ Scene.prototype.render = function(canvas) {
         ctx = canvas.getContext('2d'),
         image = ctx.createImageData(this._imagePlane.width, this._imagePlane.height),
         imageIndex = -4,
-        shade = null;
-
-    var test = 0;
+        color = null;
 
     for ( ; y > lastY; y -= pixelHeight) {
 
@@ -130,14 +203,18 @@ Scene.prototype.render = function(canvas) {
 
             if (nearest) {
 
-                shade = _shade(viewRay, nearest);
+                color = _shade.call(this, viewRay, nearest);
 
-                image.data[imageIndex] = shade.r;
-                image.data[imageIndex + 1] = shade.g;
-                image.data[imageIndex + 2] = shade.b;
-                image.data[imageIndex + 3] = 255;
+            } else {
+
+                color = this._background;
 
             }
+
+            image.data[imageIndex] = color.r;
+            image.data[imageIndex + 1] = color.g;
+            image.data[imageIndex + 2] = color.b;
+            image.data[imageIndex + 3] = 255;
 
         }
     }
@@ -149,6 +226,8 @@ Scene.prototype.render = function(canvas) {
 };
 
 function Sphere(centre, r) {
+
+    // TODO: have colour be set by constructor
 
     this.centre = centre;
     this.r = r;
