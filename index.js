@@ -1,5 +1,5 @@
 
-var EPILSON = 0.0001;
+var EPSILON = 0.0001;
 
 function _dotProduct(v1, v2) {
 
@@ -45,13 +45,21 @@ function _normalise(v) {
 
 }
 
+function _square(x) {
+
+    return Math.pow(x, 2);
+
+}
+
+
+
 // TODO: have level of specularReflection determined by surface material
 // REVIEW: specular reflection color - currently white (255 for red, green and blue)
-function _shade(viewRay, intersection) {
+function _shade(ray, intersection) {
 
-    var point = _scale(intersection.t, viewRay.direction),
+    var point = _add(_scale(intersection.t, ray.direction), ray.origin),
         surfaceNormal = intersection.surface.getNormal(point),
-        normalisedView = _normalise(viewRay.direction),
+        normalisedRay = _normalise(ray.direction),
         color = intersection.surface.getColor(point),
         l = this._lights.length,
         red = color.r * this._ambientLight,
@@ -83,7 +91,7 @@ function _shade(viewRay, intersection) {
             inShadow = !!this._surfaces[j].findRayIntersection({
                 origin: point,
                 direction: light.direction
-            }, EPILSON, Infinity);
+            }, EPSILON, Infinity);
 
             if (inShadow) {
                 break;
@@ -95,7 +103,7 @@ function _shade(viewRay, intersection) {
             continue;
         }
 
-        halfwayVector = _normalise(_subtract(light.direction, normalisedView));
+        halfwayVector = _normalise(_subtract(light.direction, normalisedRay));
 
         diffuseLight = light.intensity * Math.max(0, _dotProduct(surfaceNormal, light.direction));
         specularReflection = light.intensity * 255 * Math.pow(Math.max(0, _dotProduct(surfaceNormal, halfwayVector) * 0.99), 150);
@@ -114,9 +122,38 @@ function _shade(viewRay, intersection) {
 
 }
 
-function _square(x) {
+function _getRayColor(ray) {
 
-    return Math.pow(x, 2);
+    var nearest = null,
+        intersection = null,
+        numSurfaces = this._surfaces.length,
+        color = null;
+
+    for (var i = 0; i < numSurfaces; i++) {
+
+        // NB: using EPLISON here, so this function can be used for reflection (where the ray
+        // will originate from a surface, so need to have EPSILON to ensure that the surface
+        // itself isn't detected), but this will break for view rays if focalLength < EPSILON,
+        // which is unlikely
+        intersection = this._surfaces[i].findRayIntersection(ray, EPSILON, Infinity);
+
+        if (intersection && (!nearest || intersection.t < nearest.t)) {
+            nearest = intersection;
+        }
+
+    }
+
+    if (nearest) {
+
+        color = _shade.call(this, ray, nearest);
+
+    } else {
+
+        color = this._background;
+
+    }
+
+    return color;
 
 }
 
@@ -172,10 +209,6 @@ Scene.prototype.render = function(canvas) {
             origin: { x: 0, y: 0, z: 0 },
             direction: { x: x, y: y, z: -this._focalLength }
         },
-        numSurfaces = this._surfaces.length,
-        i = 0,
-        intersection = null,
-        nearest = null,
         ctx = canvas.getContext('2d'),
         image = ctx.createImageData(this._imagePlane.width, this._imagePlane.height),
         imageIndex = -4,
@@ -188,28 +221,9 @@ Scene.prototype.render = function(canvas) {
             viewRay.direction.x = x;
             viewRay.direction.y = y;
 
-            nearest = null;
             imageIndex += 4;
-
-            for (i = 0; i < numSurfaces; i++) {
-
-                intersection = this._surfaces[i].findRayIntersection(viewRay, 0, Infinity);
-
-                if (intersection && (!nearest || intersection.t < nearest.t)) {
-                    nearest = intersection;
-                }
-
-            }
-
-            if (nearest) {
-
-                color = _shade.call(this, viewRay, nearest);
-
-            } else {
-
-                color = this._background;
-
-            }
+            
+            color = _getRayColor.call(this, viewRay);
 
             image.data[imageIndex] = color.r;
             image.data[imageIndex + 1] = color.g;
