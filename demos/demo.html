@@ -54,7 +54,8 @@
     scene.addSurface(sphere5);
     scene.addSurface(sphere6);
 
-    scene.addLight({ x:8, y:6, z: 15 });
+    scene.addLight({ x:8, y:6, z: 15 }, 0.7);
+    scene.addLight({ x:-8, y:6, z: 15 }, 0.2);
     scene.render(document.querySelector('canvas'));
 
 

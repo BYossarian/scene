@@ -1,5 +1,5 @@
 
-var EPILSON = 0.001;
+var EPILSON = 0.0001;
 
 function _dotProduct(v1, v2) {
 
@@ -45,7 +45,8 @@ function _normalise(v) {
 
 }
 
-// TODO: shading needs clean up
+// TODO: have level of specularReflection determined by surface material
+// REVIEW: specular reflection color - currently white (255 for red, green and blue)
 function _shade(viewRay, intersection) {
 
     var point = _scale(intersection.t, viewRay.direction),
@@ -72,6 +73,13 @@ function _shade(viewRay, intersection) {
 
         for (var j = 0; j < numSurfaces; j++) {
 
+            // can't cause a shadow on self so:
+            if (this._surfaces[j] === intersection.surface) {
+                continue;
+            }
+
+            // REVIEW: could be a little more efficient, as we don't actually 
+            // need t - we only need to know if an intersection took place
             inShadow = !!this._surfaces[j].findRayIntersection({
                 origin: point,
                 direction: light.direction
@@ -84,21 +92,13 @@ function _shade(viewRay, intersection) {
         }
 
         if (inShadow) {
-            break;
+            continue;
         }
 
         halfwayVector = _normalise(_subtract(light.direction, normalisedView));
 
-        if (Math.pow(point.x, 2) < 1 &&  Math.pow(point.y, 2) < 1 ) {
-            console.log('point ', point);
-            console.log('halfwayVector ', halfwayVector);
-            console.log('surfaceNormal ', surfaceNormal);
-            console.log('light ', light.direction);
-            console.log('view ', normalisedView);
-        }
-
         diffuseLight = light.intensity * Math.max(0, _dotProduct(surfaceNormal, light.direction));
-        specularReflection = light.intensity * 255 * Math.pow(Math.max(0, _dotProduct(surfaceNormal, halfwayVector) * 0.99), 100);
+        specularReflection = light.intensity * 255 * Math.pow(Math.max(0, _dotProduct(surfaceNormal, halfwayVector) * 0.99), 150);
 
         red += color.r * diffuseLight + specularReflection;
         blue += color.b * diffuseLight + specularReflection;
