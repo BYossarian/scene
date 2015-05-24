@@ -17,10 +17,10 @@
     var sphere5 = new Scene.Sphere({ x: 100, y: 200, z: -2800 }, 80);
     var sphere6 = new Scene.Sphere({ x: -500, y: 200, z: -2800 }, 150);
 
-    sphere._color = { r: 255, g: 0, b: 0};
-    sphere2._color = { r: 0, g: 255, b: 20};
-    sphere3._color = { r: 0, g: 0, b: 255};
-    sphere4._color = { r: 0, g: 200, b: 255};
+    sphere._color = { r: 255, g: 20, b: 20};
+    sphere2._color = { r: 20, g: 255, b: 20};
+    sphere3._color = { r: 20, g: 20, b: 255};
+    sphere4._color = { r: 20, g: 200, b: 255};
     sphere5._color = { r: 180, g: 220, b: 25};
 
     // sphere3.getColor = function(point) {
@@ -40,7 +40,7 @@
     sphere6.getColor = function(point) {
 
         if (((650 + point.x) % 80) < 40) {
-            return { r: 255, g: 0, b: 0};
+            return { r: 255, g: 20, b: 20};
         } else {
             return { r: 180, g: 220, b: 25};
         }
@@ -56,7 +56,7 @@
 
     var plane = new Scene.Plane({ x: 0, y: 1, z: 0 }, { x: 0, y: -150, z: 0 });
 
-    plane._color = { r: 255, g: 255, b: 0};
+    plane._color = { r: 255, g: 255, b: 20};
 
     // plane.getColor = function(point) {
 

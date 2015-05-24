@@ -59,7 +59,7 @@ function _shade(ray, intersection, depth) {
     var point = _add(_scale(intersection.t, ray.direction), ray.origin),
         surfaceNormal = intersection.surface.getNormal(point, ray),
         normalisedRay = _normalise(ray.direction),
-        color = intersection.surface.getColor(point),
+        color = intersection.surface.getColor(point),    // color of surface at that point
         l = this._lights.length,
         totalIntensity = this._ambientLight,
         light = null,
@@ -72,7 +72,9 @@ function _shade(ray, intersection, depth) {
         reflectionColor = null,
         i = 0,
         j = 0,
-        lightDirection = null;
+        lightDirection = null,
+        reflectiveness = intersection.surface._reflectiveness,
+        rayColor = null;
 
     for (i = 0; i < l; i++) {
 
@@ -116,24 +118,30 @@ function _shade(ray, intersection, depth) {
 
     }
 
-    // // reflection
-    // reflectionRay = {
-    //     origin: point,
-    //     direction: _subtract(ray.direction, _scale(2 * _dotProduct(ray.direction, surfaceNormal), surfaceNormal))
-    // };
-    // reflectionColor = _traceRay.call(this, reflectionRay, EPSILON, Infinity, depth - 1);
-
-    // if (reflectionColor) {
-    //     red = red * 0.2 + reflectionColor.r * 0.8;
-    //     blue = blue * 0.2 + reflectionColor.g * 0.8;
-    //     green = green * 0.2 + reflectionColor.b * 0.8;
-    // }
-
-    return {
+    rayColor = {
         r: color.r * totalIntensity,
         b: color.b * totalIntensity,
         g: color.g * totalIntensity
     };
+
+    // reflections
+    if (reflectiveness) {
+
+        reflectionRay = {
+            origin: point,
+            direction: _subtract(ray.direction, _scale(2 * _dotProduct(ray.direction, surfaceNormal), surfaceNormal))
+        };
+        reflectionColor = _traceRay.call(this, reflectionRay, EPSILON, Infinity, depth - 1);
+
+        if (reflectionColor) {
+            rayColor.r = reflectiveness * reflectionColor.r + (1 - reflectiveness) * rayColor.r;
+            rayColor.b = reflectiveness * reflectionColor.b + (1 - reflectiveness) * rayColor.b;
+            rayColor.g = reflectiveness * reflectionColor.g + (1 - reflectiveness) * rayColor.g;
+        }
+
+    }
+
+    return rayColor;
 
 }
 
@@ -155,7 +163,7 @@ function _traceRay(ray, tMin, tMax, depth) {
         // will originate from a surface, so need to have EPSILON to ensure that the surface
         // itself isn't detected), but this will break for view rays if focalLength < EPSILON,
         // which is unlikely
-        intersection = this._surfaces[i].findRayIntersection(ray, EPSILON, Infinity);
+        intersection = this._surfaces[i].findRayIntersection(ray, tMin, tMax);
 
         if (intersection && (!nearest || intersection.t < nearest.t)) {
             nearest = intersection;
@@ -258,12 +266,16 @@ Scene.prototype.render = function(canvas) {
 
 };
 
-function Sphere(centre, r, color, specularExp) {
+function Sphere(centre, r, material) {
+
+    material = material || {};
 
     this._centre = centre;
     this._r = r;
-    this._color = color || { r: 100, g: 100, b: 100 };
-    this._specularExp = specularExp || 500;
+
+    this._color = material.color || { r: 100, g: 100, b: 100 };
+    this._specularExp = material.specularExp || 500;
+    this._reflectiveness = material.reflectiveness || 0.1;
 
 }
 
@@ -277,8 +289,7 @@ Sphere.prototype.findRayIntersection = function(ray, lowerT, upperT) {
         discriminant = _square(_dotProduct(d, oMinusC)) - (dDotD * (_dotProduct(oMinusC, oMinusC) - _square(this._r))),
         t1 = 0,
         t2 = 0,
-        b = 0,
-        t = 0;
+        b = 0;
 
     if (discriminant < 0) {
         return null;
@@ -317,18 +328,22 @@ Sphere.prototype.getNormal = function(point, ray) {
 
 };
 
-Sphere.prototype.getColor = function(point) {
+Sphere.prototype.getColor = function(point, ray) {
 
     return this._color;
 
 };
 
-function Plane(normal, point, color, specularExp) {
+function Plane(normal, point, material) {
+
+    material = material || {};
 
     this._normal = _normalise(normal);
     this._point = point;
-    this._color = color || { r: 100, g: 100, b: 100 };
-    this._specularExp = specularExp || 500;
+    
+    this._color = material.color || { r: 100, g: 100, b: 100 };
+    this._specularExp = material.specularExp || 500;
+    this._reflectiveness = material.reflectiveness || 0.1;
 
 }
 
@@ -367,7 +382,7 @@ Plane.prototype.getNormal = function(point, ray) {
 
 };
 
-Plane.prototype.getColor = function(point) {
+Plane.prototype.getColor = function(point, ray) {
 
     return this._color;
 
