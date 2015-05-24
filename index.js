@@ -1,6 +1,6 @@
 
 var EPSILON = 0.0001;
-var MAX_DEPTH = 1;
+var TRACE_DEPTH = 2;
 
 function _dotProduct(v1, v2) {
 
@@ -124,7 +124,7 @@ function _shade(ray, intersection, depth) {
         origin: point,
         direction: _subtract(ray.direction, _scale(2 * _dotProduct(ray.direction, surfaceNormal), surfaceNormal))
     };
-    reflectionColor = _traceRay.call(this, reflectionRay, depth + 1);
+    reflectionColor = _traceRay.call(this, reflectionRay, EPSILON, Infinity, depth - 1);
 
     if (reflectionColor) {
         red = red * 0.5 + reflectionColor.r * 0.5;
@@ -140,11 +140,9 @@ function _shade(ray, intersection, depth) {
 
 }
 
-function _traceRay(ray, depth) {
+function _traceRay(ray, tMin, tMax, depth) {
 
-    depth = depth || 0;
-
-    if (depth > MAX_DEPTH) {
+    if (!depth) {
         return null;
     }
 
@@ -153,6 +151,7 @@ function _traceRay(ray, depth) {
         numSurfaces = this._surfaces.length,
         color = null;
 
+    // find nearest surface that intersects the ray
     for (var i = 0; i < numSurfaces; i++) {
 
         // NB: using EPLISON here, so this function can be used for reflection (where the ray
@@ -244,7 +243,7 @@ Scene.prototype.render = function(canvas) {
             viewRay.direction.x = x;
             viewRay.direction.y = y;
             
-            color = _traceRay.call(this, viewRay) || this._background;
+            color = _traceRay.call(this, viewRay, 0, Infinity, TRACE_DEPTH) || this._background;
 
             image.data[imageIndex] = color.r;
             image.data[imageIndex + 1] = color.g;
