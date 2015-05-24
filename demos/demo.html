@@ -54,8 +54,36 @@
     scene.addSurface(sphere5);
     scene.addSurface(sphere6);
 
+    var plane = new Scene.Plane({ x: 0, y: 1, z: 0 }, { x: 0, y: -150, z: 0 });
+
+    plane._color = { r: 200, g: 200, b: 200};
+
+    // plane.getColor = function(point) {
+
+    //     if (point.x < 0) {
+    //         point.x = 100 + Math.sign(point.x) * point.x;
+    //     }
+
+    //     if (point.z < 0) {
+    //         point.z = 200 + Math.sign(point.z) * point.z;
+    //     }
+
+    //     if ((point.x % 200) < 100 && (point.z % 400) < 200) {
+    //         return { r: 0, g: 0, b: 0};
+    //     } else {
+    //         if ((point.x % 200) > 100 && (point.z % 400) > 200) {
+    //             return { r: 0, g: 0, b: 0};
+    //         } else {
+    //             return { r: 255, g: 255, b: 255};
+    //         }
+    //     }
+
+    // };
+
+    scene.addSurface(plane);
+
     scene.addLight({ x:8, y:6, z: 15 }, 0.7);
-    scene.addLight({ x:-8, y:6, z: 15 }, 0.2);
+    scene.addLight({ x:-8, y:60, z: 15 }, 0.2);
     scene.render(document.querySelector('canvas'));
 
 
