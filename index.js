@@ -2,6 +2,8 @@
 var EPSILON = 0.0001;
 var TRACE_DEPTH = 2;
 
+// VECTOR OPERATIONS
+
 function _dotProduct(v1, v2) {
 
     return (v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z);
@@ -159,10 +161,6 @@ function _traceRay(ray, tMin, tMax, depth) {
     // find nearest surface that intersects the ray
     for (var i = 0; i < numSurfaces; i++) {
 
-        // NB: using EPLISON here, so this function can be used for reflection (where the ray
-        // will originate from a surface, so need to have EPSILON to ensure that the surface
-        // itself isn't detected), but this will break for view rays if focalLength < EPSILON,
-        // which is unlikely
         intersection = this._surfaces[i].findRayIntersection(ray, tMin, tMax);
 
         if (intersection && (!nearest || intersection.t < nearest.t)) {
@@ -253,7 +251,7 @@ Scene.prototype.render = function(canvas) {
             image.data[imageIndex] = color.r;
             image.data[imageIndex + 1] = color.g;
             image.data[imageIndex + 2] = color.b;
-            image.data[imageIndex + 3] = 255;
+            image.data[imageIndex + 3] = color.a || 255;
 
             imageIndex += 4;
 
