@@ -54,8 +54,6 @@ function _square(x) {
 
 
 
-// TODO: have level of specularReflection determined by surface material
-// REVIEW: specular reflection color - currently white (255 for red, green and blue)
 function _shade(ray, intersection, depth) {
 
     var point = _add(_scale(intersection.t, ray.direction), ray.origin),
@@ -63,23 +61,24 @@ function _shade(ray, intersection, depth) {
         normalisedRay = _normalise(ray.direction),
         color = intersection.surface.getColor(point),
         l = this._lights.length,
-        red = color.r * this._ambientLight,
-        green = color.g * this._ambientLight,
-        blue = color.b * this._ambientLight,
+        totalIntensity = this._ambientLight,
         light = null,
         diffuseLight = 0,
-        specularReflection = 0,
+        specularHighlights = 0,
         halfwayVector = null,
         numSurfaces = this._surfaces.length,
         inShadow = false,
         reflectionRay = null,
         reflectionColor = null,
         i = 0,
-        j = 0;
+        j = 0,
+        lightDirection = null;
 
     for (i = 0; i < l; i++) {
 
         light = this._lights[i];
+        // light direction is normalied vector pointing towards the light
+        lightDirection = _normalise(_subtract(light.position, point));
 
         // check for shadow
         inShadow = false;
@@ -95,7 +94,7 @@ function _shade(ray, intersection, depth) {
             // need t - we only need to know if an intersection took place
             inShadow = !!this._surfaces[j].findRayIntersection({
                 origin: point,
-                direction: light.direction
+                direction: lightDirection
             }, EPSILON, Infinity);
 
             if (inShadow) {
@@ -108,34 +107,32 @@ function _shade(ray, intersection, depth) {
             continue;
         }
 
-        halfwayVector = _normalise(_subtract(light.direction, normalisedRay));
+        halfwayVector = _normalise(_subtract(lightDirection, normalisedRay));
 
-        diffuseLight = light.intensity * Math.max(0, _dotProduct(surfaceNormal, light.direction));
-        specularReflection = light.intensity * 255 * Math.pow(Math.max(0, _dotProduct(surfaceNormal, halfwayVector) * 0.99), 150);
+        diffuseLight = Math.max(0, _dotProduct(surfaceNormal, lightDirection));
+        specularHighlights = Math.pow(Math.max(0, _dotProduct(surfaceNormal, halfwayVector) * 0.999), intersection.surface._specularExp);
 
-        red += color.r * diffuseLight + specularReflection;
-        blue += color.b * diffuseLight + specularReflection;
-        green += color.g * diffuseLight + specularReflection;
+        totalIntensity += light.intensity * (diffuseLight + specularHighlights);
 
     }
 
-    // reflection
-    reflectionRay = {
-        origin: point,
-        direction: _subtract(ray.direction, _scale(2 * _dotProduct(ray.direction, surfaceNormal), surfaceNormal))
-    };
-    reflectionColor = _traceRay.call(this, reflectionRay, EPSILON, Infinity, depth - 1);
+    // // reflection
+    // reflectionRay = {
+    //     origin: point,
+    //     direction: _subtract(ray.direction, _scale(2 * _dotProduct(ray.direction, surfaceNormal), surfaceNormal))
+    // };
+    // reflectionColor = _traceRay.call(this, reflectionRay, EPSILON, Infinity, depth - 1);
 
-    if (reflectionColor) {
-        red = red * 0.5 + reflectionColor.r * 0.5;
-        blue = blue * 0.5 + reflectionColor.g * 0.5;
-        green = green * 0.5 + reflectionColor.b * 0.5;
-    }
+    // if (reflectionColor) {
+    //     red = red * 0.2 + reflectionColor.r * 0.8;
+    //     blue = blue * 0.2 + reflectionColor.g * 0.8;
+    //     green = green * 0.2 + reflectionColor.b * 0.8;
+    // }
 
     return {
-        r: red,
-        b: blue,
-        g: green
+        r: color.r * totalIntensity,
+        b: color.b * totalIntensity,
+        g: color.g * totalIntensity
     };
 
 }
@@ -204,10 +201,10 @@ function Scene(options) {
 
 }
 
-Scene.prototype.addLight = function(direction, intensity) {
+Scene.prototype.addLight = function(position, intensity) {
 
     this._lights.push({
-        direction: _normalise(direction),
+        position: position,
         intensity: intensity || 1
     });
 
@@ -261,23 +258,23 @@ Scene.prototype.render = function(canvas) {
 
 };
 
-function Sphere(centre, r) {
+function Sphere(centre, r, color, specularExp) {
 
-    // TODO: have colour be set by constructor
-
-    this.centre = centre;
-    this.r = r;
+    this._centre = centre;
+    this._r = r;
+    this._color = color || { r: 100, g: 100, b: 100 };
+    this._specularExp = specularExp || 500;
 
 }
 
 Sphere.prototype.findRayIntersection = function(ray, lowerT, upperT) {
 
-    var c = this.centre,
+    var c = this._centre,
         o = ray.origin,
         d = ray.direction,
         oMinusC = _subtract(o, c),
         dDotD = _dotProduct(d, d),
-        discriminant = _square(_dotProduct(d, oMinusC)) - (dDotD * (_dotProduct(oMinusC, oMinusC) - _square(this.r))),
+        discriminant = _square(_dotProduct(d, oMinusC)) - (dDotD * (_dotProduct(oMinusC, oMinusC) - _square(this._r))),
         t1 = 0,
         t2 = 0,
         b = 0,
@@ -316,7 +313,7 @@ Sphere.prototype.findRayIntersection = function(ray, lowerT, upperT) {
 
 Sphere.prototype.getNormal = function(point, ray) {
 
-    return _scale(1 / this.r, _subtract(point, this.centre));
+    return _scale(1 / this._r, _subtract(point, this._centre));
 
 };
 
@@ -326,12 +323,12 @@ Sphere.prototype.getColor = function(point) {
 
 };
 
-function Plane(normal, point) {
-
-    // TODO: have colour be set by constructor
+function Plane(normal, point, color, specularExp) {
 
     this._normal = _normalise(normal);
     this._point = point;
+    this._color = color || { r: 100, g: 100, b: 100 };
+    this._specularExp = specularExp || 500;
 
 }
 
