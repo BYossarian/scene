@@ -108,19 +108,6 @@ function _shade(ray, intersection, depth) {
             continue;
         }
 
-        // reflection
-        reflectionRay = {
-            origin: point,
-            direction: _subtract(ray.direction, _scale(2 * _dotProduct(ray.direction, surfaceNormal), surfaceNormal))
-        };
-        reflectionColor = _getRayColor.call(this, reflectionRay, depth + 1);
-
-        if (reflectionColor) {
-            red += reflectionColor.r * 0.2;
-            blue += reflectionColor.g * 0.2;
-            green += reflectionColor.b * 0.2;
-        }
-
         halfwayVector = _normalise(_subtract(light.direction, normalisedRay));
 
         diffuseLight = light.intensity * Math.max(0, _dotProduct(surfaceNormal, light.direction));
@@ -132,6 +119,19 @@ function _shade(ray, intersection, depth) {
 
     }
 
+    // reflection
+    reflectionRay = {
+        origin: point,
+        direction: _subtract(ray.direction, _scale(2 * _dotProduct(ray.direction, surfaceNormal), surfaceNormal))
+    };
+    reflectionColor = _traceRay.call(this, reflectionRay, depth + 1);
+
+    if (reflectionColor) {
+        red = red * 0.5 + reflectionColor.r * 0.5;
+        blue = blue * 0.5 + reflectionColor.g * 0.5;
+        green = green * 0.5 + reflectionColor.b * 0.5;
+    }
+
     return {
         r: red,
         b: blue,
@@ -140,7 +140,7 @@ function _shade(ray, intersection, depth) {
 
 }
 
-function _getRayColor(ray, depth) {
+function _traceRay(ray, depth) {
 
     depth = depth || 0;
 
@@ -244,7 +244,7 @@ Scene.prototype.render = function(canvas) {
             viewRay.direction.x = x;
             viewRay.direction.y = y;
             
-            color = _getRayColor.call(this, viewRay) || this._background;
+            color = _traceRay.call(this, viewRay) || this._background;
 
             image.data[imageIndex] = color.r;
             image.data[imageIndex + 1] = color.g;
