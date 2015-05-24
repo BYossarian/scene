@@ -268,12 +268,20 @@ function Sphere(centre, r, material) {
 
     material = material || {};
 
+    var color = material.color || { r: 100, g: 100, b: 100 };
+
     this._centre = centre;
     this._r = r;
 
-    this._color = material.color || { r: 100, g: 100, b: 100 };
     this._specularExp = material.specularExp || 500;
-    this._reflectiveness = material.reflectiveness || 0.1;
+    this._reflectiveness = material.reflectiveness || 0;
+
+    // allow color to be a function
+    if (typeof color === 'function') {
+        this.getColor = color;
+    } else {
+        this._color = color;
+    }
 
 }
 
@@ -336,12 +344,20 @@ function Plane(normal, point, material) {
 
     material = material || {};
 
+    var color = material.color || { r: 100, g: 100, b: 100 };
+
     this._normal = _normalise(normal);
     this._point = point;
     
-    this._color = material.color || { r: 100, g: 100, b: 100 };
     this._specularExp = material.specularExp || 500;
-    this._reflectiveness = material.reflectiveness || 0.1;
+    this._reflectiveness = material.reflectiveness || 0;
+
+    // allow color to be a function
+    if (typeof color === 'function') {
+        this.getColor = color;
+    } else {
+        this._color = color;
+    }
 
 }
 
