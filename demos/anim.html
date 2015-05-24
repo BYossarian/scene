@@ -7,45 +7,49 @@
 <script src="/index.js"></script>
 <script>
 
-    var scene = new Scene.Scene();
+var scene = new Scene.Scene();
 
-    var sphere = new Scene.Sphere({ x: 0, y: -50, z: -2450 }, 100),
-        sphere2 = new Scene.Sphere({ x: 100, y: 0, z: -2500 }, 120),
-        sphere3 = new Scene.Sphere({ x: 400, y: 0, z: -1800 }, 200);
+    function stripedColor(point) {
 
-    var sphere4 = new Scene.Sphere({ x: -200, y: 0, z: -1800 }, 100);
-    var sphere5 = new Scene.Sphere({ x: 100, y: 200, z: -2800 }, 80);
-    var sphere6 = new Scene.Sphere({ x: -500, y: 200, z: -2800 }, 150);
+        var x = point.x;
 
-    sphere._color = { r: 255, g: 0, b: 0};
-    sphere2._color = { r: 0, g: 255, b: 20};
-    sphere3._color = { r: 0, g: 0, b: 255};
-    sphere4._color = { r: 0, g: 200, b: 255};
-    sphere5._color = { r: 180, g: 220, b: 25};
-
-    // sphere3.getColor = function(point) {
-
-    //     if (((1650 + point.x) % 100) < 50 && ((1650 + point.y) % 100) < 50) {
-    //         return { r: 250, g: 250, b: 250};
-    //     } else {
-    //         if (((1650 + point.x) % 100) > 50 && ((1650 + point.y) % 100) > 50) {
-    //             return { r: 250, g: 250, b: 250};
-    //         } else {
-    //             return { r: 10, g: 10, b: 10};
-    //         }
-    //     }
-
-    // };
-
-    sphere6.getColor = function(point) {
-
-        if (((650 + point.x) % 80) < 40) {
-            return { r: 255, g: 0, b: 0};
-        } else {
-            return { r: 180, g: 220, b: 25};
+        if (x < 0) {
+            x = 80 - x;
         }
 
-    };
+        if ((x % 80) < 40) {
+            return { r: 255, g: 20, b: 20 };
+        } else {
+            return { r: 180, g: 220, b: 25 };
+        }
+
+    }
+
+    var sphere = new Scene.Sphere({ x: 0, y: -50, z: -2450 }, 100, {
+            color: { r: 255, g: 20, b: 20 }
+        }),
+        sphere2 = new Scene.Sphere({ x: 100, y: 0, z: -2500 }, 120, {
+            color: { r: 20, g: 255, b: 20 }
+        }),
+        sphere3 = new Scene.Sphere({ x: 400, y: 0, z: -1800 }, 200, {
+            color: { r: 20, g: 20, b: 255 }, reflectiveness: 0.25
+        }),
+        sphere4 = new Scene.Sphere({ x: -200, y: 0, z: -1800 }, 100, {
+            color: { r: 20, g: 200, b: 255 }
+        }),
+        sphere5 = new Scene.Sphere({ x: 100, y: 200, z: -2800 }, 80, {
+            color: { r: 180, g: 220, b: 25 }, reflectiveness: 0.5
+        }),
+        sphere6 = new Scene.Sphere({ x: -500, y: 200, z: -2800 }, 150, {
+            color: stripedColor
+        }),
+        plane = new Scene.Plane(
+            { x: 0, y: 1, z: 0 },
+            { x: 0, y: -150, z: 0 },
+            { color: { r: 255, g: 255, b: 20},  reflectiveness: 0.1 }
+        );
+
+    var theta = 0;
 
     scene.addSurface(sphere);
     scene.addSurface(sphere2);
@@ -53,12 +57,12 @@
     scene.addSurface(sphere4);
     scene.addSurface(sphere5);
     scene.addSurface(sphere6);
-
-    var theta = 0;
+    scene.addSurface(plane);
 
     function draw() {
 
-        scene._lights = [{ x:Math.cos(theta), y:Math.sin(theta), z: -Math.cos(theta) }];
+        scene._lights = [];
+        scene.addLight({ x:Math.cos(theta) * 800, y:Math.sin(theta) * 2000, z: -Math.cos(theta) * 1000 }, 0.8);
         scene.render(document.querySelector('canvas'));
 
         if (theta < Math.PI * 2) {
