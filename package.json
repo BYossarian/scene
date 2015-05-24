@@ -1,8 +1,8 @@
 {
   "name": "scene",
-  "version": "0.5.0",
+  "version": "1.0.0",
   "description": "A Javascript ray tracer",
-  "main": "index.js",
+  "main": "./lib/scene.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,8 +15,8 @@
     "graphics",
     "ray",
     "tracing",
-    "ray",
-    "casting"
+    "casting",
+    "modelling"
   ],
   "author": "Ben Jackson",
   "license": "MIT",
