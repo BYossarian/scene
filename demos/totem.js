@@ -1,9 +1,11 @@
 
-var Scene = require('scene');
+'use strict';
 
-var scene = new Scene.Scene({ background: { r: 100, g: 100, b: 100 } });
+const Scene = require('scene');
 
-var topSphere = new Scene.Sphere({ x: -300, y: 200, z: -2800 }, 80, {
+const scene = new Scene.Scene({ background: { r: 100, g: 100, b: 100 } });
+
+const topSphere = new Scene.Sphere({ x: -300, y: 200, z: -2800 }, 80, {
         color: { r: 160, g: 160, b: 160 }, specularExp: 10000
     }),
     middleSphere = new Scene.Sphere({ x: -300, y: 40, z: -2800 }, 80, {

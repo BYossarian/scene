@@ -1,9 +1,11 @@
 
-var Scene = require('scene');
+'use strict';
 
-var scene = new Scene.Scene({ background: { r: 16, g: 16, b: 16 } });
+const Scene = require('scene');
 
-var wheelRadius = 300,
+const scene = new Scene.Scene({ background: { r: 16, g: 16, b: 16 } });
+
+const wheelRadius = 300,
     colourWheel = [
         { r: 255, g: 0, b: 0 },
         { r: 255, g: 125, b: 0 },
@@ -21,7 +23,7 @@ var wheelRadius = 300,
 
 colourWheel.forEach(function(colour, i) {
 
-    var angle = i * Math.PI/6;
+    const angle = i * Math.PI/6;
 
     scene.addSurface(new Scene.Sphere(
         { x: wheelRadius * Math.sin(angle), y: wheelRadius * Math.cos(angle), z: -2800 }, 
