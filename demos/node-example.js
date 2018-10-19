@@ -34,7 +34,10 @@ const lights = [{
 const options = {
     cameraPosition: { x: 0, y: 0, z: -750 },
     background: { r: 100, g: 100, b: 100 },
-    ambientLight: 0.15
+    ambientLight: 0.15,
+    targetWidth: 1920,
+    targetHeight: 1080,
+    ssaa: 16
 };
 
 const png = new PNG({
@@ -42,9 +45,11 @@ const png = new PNG({
         inputColorType: 6,
         bitDepth: 8,
         inputHasAlpha: true,
-        width: 1280,
-        height: 720
+        width: 1920,
+        height: 1080
     });
+
+console.log('Rendering scene at 1080p with 16x SSAA (this might take a while) ...');
 
 Scene.render(surfaces, lights, png.data, options);
 
