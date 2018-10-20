@@ -28,12 +28,15 @@ const surfaces = [topSphere, middleSphere, bottomSphere, mirror, plane];
 
 const lights = [new Scene.PointLight({ x: 800, y: 1600, z: -1000 }, 0.8)];
 
+const width = 1920;
+const height = 1080;
+
 const options = {
     cameraPosition: { x: 0, y: 0, z: -750 },
     background: { r: 100, g: 100, b: 100 },
     ambientLight: 0.15,
-    targetWidth: 1920,
-    targetHeight: 1080,
+    targetWidth: width,
+    targetHeight: height,
     ssaa: 16
 };
 
@@ -42,8 +45,8 @@ const png = new PNG({
         inputColorType: 6,
         bitDepth: 8,
         inputHasAlpha: true,
-        width: 1920,
-        height: 1080
+        width: width,
+        height: height
     });
 
 console.log('Rendering scene at 1080p with 16x SSAA (this might take a while) ...');
