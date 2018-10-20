@@ -25,10 +25,7 @@
             { r: 255, g: 0, b: 125 }
         ];
 
-    const lights = [{
-            position: { x: 450, y: 175, z: -2100 },
-            intensity: 0.8
-        }];
+    const lights = [new Scene.PointLight({ x: 450, y: 175, z: -2100 }, 0.8)];
 
     const options = {
         cameraPosition: { x: 0, y: 0, z: 0 },

@@ -26,10 +26,7 @@ const plane = new Scene.Plane(
 
 const surfaces = [topSphere, middleSphere, bottomSphere, mirror, plane];
 
-const lights = [{
-        position: { x: 800, y: 1600, z: -1000 },
-        intensity: 0.8
-    }];
+const lights = [new Scene.PointLight({ x: 800, y: 1600, z: -1000 }, 0.8)];
 
 const options = {
     cameraPosition: { x: 0, y: 0, z: -750 },
