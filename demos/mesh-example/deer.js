@@ -1,4 +1,6 @@
 
+// credit for deer model: https://free3d.com/3d-model/low-poly-deer-87801.html
+
 const fs = require('fs');
 const PNG = require('pngjs').PNG;
 const Scene = require('../lib/scene.js');
