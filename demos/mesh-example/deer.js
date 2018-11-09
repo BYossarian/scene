@@ -5,14 +5,6 @@ const fs = require('fs');
 const PNG = require('pngjs').PNG;
 const Scene = require('../lib/scene.js');
 
-// Vector operations
-const Vector = require('../lib/vector.js');
-const _dotProduct = Vector.dotProduct;
-const _crossProduct = Vector.crossProduct;
-const _subtract = Vector.subtract;
-const _add = Vector.add;
-const _scale = Vector.scale;
-const _normalise = Vector.normalise;
 
 const deerMesh = require('./deer.json');
 
